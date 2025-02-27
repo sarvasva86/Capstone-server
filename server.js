@@ -19,8 +19,11 @@ mongoose.connect(process.env.MONGO_URI, {
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log("Database Connection Error:", err));
 
+// ✅ Include authentication routes
 app.use("/api/auth", authRoutes);  // Use authentication routes at "/api/auth"
 app.use("/api/itineraries", itineraryRoutes);  // Use itinerary routes at "/api/itineraries"
 
 const PORT = process.env.PORT || 5000;  // Set port from environment or default to 5000
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));  // Start the server
+
+
