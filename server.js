@@ -29,6 +29,7 @@ app.use("/api/auth", authRoutes);  // Use authentication routes at "/api/auth"
 app.use("/api/itineraries", itineraryRoutes);  // Use itinerary routes at "/api/itineraries"
 
 const PORT = process.env.PORT || 5000;  // Set port from environment or default to 5000
+console.log("Routes Loaded:", app._router.stack.map(r => r.route && r.route.path));
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));  // Start the server
 
 
