@@ -9,7 +9,12 @@ const itineraryRoutes = require("./routes/itineraryRoutes");  // Import itinerar
 const app = express();  // Initialize Express application
 
 app.use(express.json());  // Enable JSON parsing for incoming requests
-app.use(cors());  // Enable CORS for frontend-backend communication
+app.use(cors({
+  origin: "*",  // Allow all origins (change to frontend URL in production)
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
+
 
 // Connect to MongoDB using Mongoose
 mongoose.connect(process.env.MONGO_URI, { 
