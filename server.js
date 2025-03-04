@@ -11,7 +11,7 @@ const app = express();  // Initialize Express application
 app.use(express.json());  // Enable JSON parsing for incoming requests
 app.use(cors({
   origin:'https://capstone-frontend-0red.onrender.com',  // Allow all origins (change to frontend URL in production)
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'] // Allow methods
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow methods
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers
 }));
 
