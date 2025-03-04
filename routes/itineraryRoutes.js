@@ -2,6 +2,10 @@ const express = require("express");
 const router = express.Router();
 const Itinerary = require("../models/Itinerary");
 
+router.get('/itineraries', (req, res) => {
+  res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+});
+
 router.post("/", async (req, res) => {
   const newItinerary = new Itinerary(req.body);
   await newItinerary.save();
@@ -13,4 +17,6 @@ router.get("/", async (req, res) => {
   res.json(itineraries);
 });
 
+
 module.exports = router;
+
