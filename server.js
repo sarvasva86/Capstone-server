@@ -10,10 +10,13 @@ const app = express();  // Initialize Express application
 
 app.use(express.json());  // Enable JSON parsing for incoming requests
 app.use(cors({
-  origin: "*",  // Allow all origins (change to frontend URL in production)
-  methods: ["GET", "POST"],
-  allowedHeaders: ["Content-Type"]
+  origin:'https://capstone-frontend-0red.onrender.com',  // Allow all origins (change to frontend URL in production)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'] // Allow methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 
 // Connect to MongoDB using Mongoose
@@ -31,5 +34,4 @@ app.use("/api/itineraries", itineraryRoutes);  // Use itinerary routes at "/api/
 const PORT = process.env.PORT || 5000;  // Set port from environment or default to 5000
 console.log("Routes Loaded:", app._router.stack.map(r => r.route && r.route.path));
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));  // Start the server
-
 
