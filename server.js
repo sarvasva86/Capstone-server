@@ -1,34 +1,34 @@
-const express = require("express");  // Import Express framework
-const mongoose = require("mongoose");  // Import Mongoose to connect to MongoDB
-const cors = require("cors");  // Import CORS to handle cross-origin requests
-require("dotenv").config();  // Load environment variables
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import authRoutes from "./routes/authRoutes.js";
+import itineraryRoutes from "./routes/itineraryRoutes.js"; // Added .js extension
 
-const authRoutes = require("./routes/authRoutes.js");  // Import authentication routes
-const itineraryRoutes = require("./routes/itineraryRoutes");  // Import itinerary routes
+// Load environment variables
+dotenv.config();
 
-const app = express();  // Initialize Express application
+const app = express();
 
-app.use(express.json());  // Enable JSON parsing for incoming requests
+// Middleware
+app.use(express.json());
 app.use(cors({
-  origin:'https://capstone-frontend-0red.onrender.com',  // Allow all origins (change to frontend URL in production)
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allow headers
+  origin: 'https://capstone-frontend-0red.onrender.com',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Handle preflight requests
 app.options('*', cors());
 
-
-// Connect to MongoDB using Mongoose
+// Database connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.error("MongoDB Connection Error:", err));
-  
-// ✅ Include authentication routes
-app.use("/api/auth", authRoutes);  // Use authentication routes at "/api/auth"
-app.use("/api/itineraries", itineraryRoutes);  // Use itinerary routes at "/api/itineraries"
 
-const PORT = process.env.PORT || 5000;  // Set port from environment or default to 5000
-console.log("Routes Loaded:", app._router.stack.map(r => r.route && r.route.path));
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));  // Start the server
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/itineraries", itineraryRoutes);
 
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
