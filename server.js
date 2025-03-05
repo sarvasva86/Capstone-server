@@ -36,16 +36,10 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use("/api/auth", authRoutes);
 app.use("/api/itineraries", itineraryRoutes);
 
-// Serve Frontend in Production
-if (process.env.NODE_ENV === "production") {
-  // Set static folder
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
-
-  // Handle React routing - return all requests to React app
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
-  });
-}
+// Simple health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
