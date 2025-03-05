@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const Itinerary = require("../models/Itinerary");
+import Itinerary from "../models/Itinerary";
 
 router.get('/itineraries', (req, res) => {
   res.header('Access-Control-Allow-Headers', 'Authorization, Content-Type');
@@ -17,6 +17,6 @@ router.get("/", async (req, res) => {
   res.json(itineraries);
 });
 
+export default router;
 
-module.exports = router;
 
