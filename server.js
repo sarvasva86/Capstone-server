@@ -20,13 +20,10 @@ app.options('*', cors());
 
 
 // Connect to MongoDB using Mongoose
-mongoose.connect(process.env.MONGO_URI, { 
-  useNewUrlParser: true, 
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log("Database Connection Error:", err));
-
+  .catch(err => console.error("MongoDB Connection Error:", err));
+  
 // ✅ Include authentication routes
 app.use("/api/auth", authRoutes);  // Use authentication routes at "/api/auth"
 app.use("/api/itineraries", itineraryRoutes);  // Use itinerary routes at "/api/itineraries"
