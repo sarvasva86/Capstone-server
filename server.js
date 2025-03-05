@@ -2,11 +2,17 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
-import itineraryRoutes from "./routes/itineraryRoutes.js"; 
+import itineraryRoutes from "./routes/itineraryRoutes.js";
 
-// Load environment variables
+// Configure environment
 dotenv.config();
+
+// ES module fix for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -26,9 +32,20 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.error("MongoDB Connection Error:", err));
 
-// Routes
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/itineraries", itineraryRoutes);
+
+// Serve Frontend in Production
+if (process.env.NODE_ENV === "production") {
+  // Set static folder
+  app.use(express.static(path.join(__dirname, "../frontend/build")));
+
+  // Handle React routing - return all requests to React app
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
