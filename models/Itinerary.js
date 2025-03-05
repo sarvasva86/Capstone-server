@@ -1,10 +1,10 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const ItinerarySchema = new mongoose.Schema({
+const itinerarySchema = new mongoose.Schema({
   userId: String,
   destinations: [String],
   startDate: Date,
   endDate: Date,
 });
 
-module.exports = mongoose.model("Itinerary", ItinerarySchema);
+export default mongoose.model("Itinerary", itinerarySchema);
