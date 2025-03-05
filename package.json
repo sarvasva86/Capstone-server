@@ -6,7 +6,7 @@
   "name": "virtual-travel-planner-server",
   "version": "1.0.0",
   "engines": {
-    "node": "22.13.0" 
+    "node": "22.x" 
   },
   "main": "server.js",
   "scripts": {
