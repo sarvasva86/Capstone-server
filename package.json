@@ -1,3 +1,7 @@
+
+{
+  "type": "module"
+}
 {
   "name": "virtual-travel-planner-server",
   "version": "1.0.0",
