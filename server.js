@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
-import itineraryRoutes from "./routes/itineraryRoutes.js"; // Added .js extension
+import itineraryRoutes from "./routes/itineraryRoutes.js"; 
 
 // Load environment variables
 dotenv.config();
