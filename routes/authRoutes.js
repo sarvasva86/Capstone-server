@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import User from "../models/User.js"; // Ensure this model exists
 
+const express = require("express");
 const router = express.Router();
 
 // Proper signup route
@@ -14,8 +15,10 @@ router.post("/signup", async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ error: "Email already exists" });
     }
+    module.exports = router;
 
-    // Hash password
+
+  // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
