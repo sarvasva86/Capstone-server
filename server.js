@@ -3,7 +3,7 @@ const mongoose = require("mongoose");  // Import Mongoose to connect to MongoDB
 const cors = require("cors");  // Import CORS to handle cross-origin requests
 require("dotenv").config();  // Load environment variables
 
-const authRoutes = require("./routes/authRoutes");  // Import authentication routes
+const authRoutes = require("./routes/authRoutes.js");  // Import authentication routes
 const itineraryRoutes = require("./routes/itineraryRoutes");  // Import itinerary routes
 
 const app = express();  // Initialize Express application
