@@ -3,12 +3,37 @@ import Itinerary from "../models/Itinerary.js";
 
 const router = express.Router();
 
+// Enhanced validation middleware
+const validateItinerary = (req, res, next) => {
+  const { title, activities } = req.body;
+  
+  if (!title?.trim()) {
+    return res.status(400).json({ error: "Title is required" });
+  }
+  
+  if (!Array.isArray(activities) || activities.length === 0) {
+    return res.status(400).json({ error: "At least one activity is required" });
+  }
+
+  // Clean activities array
+  req.body.activities = activities
+    .map(activity => activity.trim())
+    .filter(activity => activity !== '');
+
+  if (req.body.activities.length === 0) {
+    return res.status(400).json({ error: "Valid activities required" });
+  }
+
+  next();
+};
+
 // Get all itineraries
 router.get("/", async (req, res) => {
   try {
-    const itineraries = await Itinerary.find();
+    const itineraries = await Itinerary.find().sort({ createdAt: -1 });
     res.json(itineraries);
   } catch (error) {
+    console.error("GET error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -22,36 +47,34 @@ router.get("/:id", async (req, res) => {
     }
     res.json(itinerary);
   } catch (error) {
+    console.error("GET by ID error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
 // Create new itinerary
-router.post("/", async (req, res) => {
+router.post("/", validateItinerary, async (req, res) => {
   try {
-    if (!req.body.title || !req.body.activities) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
+    const newItinerary = new Itinerary({
+      ...req.body,
+      title: req.body.title.trim()
+    });
     
-    const newItinerary = new Itinerary(req.body);
     await newItinerary.save();
     res.status(201).json(newItinerary);
   } catch (error) {
+    console.error("POST error:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
 // Update itinerary
-router.put("/:id", async (req, res) => {
+router.put("/:id", validateItinerary, async (req, res) => {
   try {
-    if (!req.body.title || !req.body.activities) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-    
     const updatedItinerary = await Itinerary.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true }
+      { ...req.body, title: req.body.title.trim() },
+      { new: true, runValidators: true }
     );
     
     if (!updatedItinerary) {
@@ -60,6 +83,7 @@ router.put("/:id", async (req, res) => {
     
     res.json(updatedItinerary);
   } catch (error) {
+    console.error("PUT error:", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -73,8 +97,12 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ error: "Itinerary not found" });
     }
     
-    res.json({ message: "Itinerary deleted successfully" });
+    res.json({ 
+      message: "Itinerary deleted successfully",
+      deletedId: deletedItinerary._id 
+    });
   } catch (error) {
+    console.error("DELETE error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
