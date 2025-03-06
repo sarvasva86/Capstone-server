@@ -3,107 +3,57 @@ import Itinerary from "../models/Itinerary.js";
 
 const router = express.Router();
 
-// Enhanced validation middleware
+// Middleware for JSON parsing error handling
+router.use(express.json());
+
+// Validation middleware
 const validateItinerary = (req, res, next) => {
+  if (!req.body) {
+    return res.status(400).json({ error: "Request body is required" });
+  }
+
   const { title, activities } = req.body;
   
   if (!title?.trim()) {
     return res.status(400).json({ error: "Title is required" });
   }
   
-  if (!Array.isArray(activities) || activities.length === 0) {
-    return res.status(400).json({ error: "At least one activity is required" });
+  if (!Array.isArray(activities) || activities.filter(a => a?.trim()).length === 0) {
+    return res.status(400).json({ error: "At least one valid activity is required" });
   }
 
-  // Clean activities array
+  // Clean data
+  req.body.title = title.trim();
   req.body.activities = activities
-    .map(activity => activity.trim())
-    .filter(activity => activity !== '');
-
-  if (req.body.activities.length === 0) {
-    return res.status(400).json({ error: "Valid activities required" });
-  }
+    .map(activity => activity?.trim())
+    .filter(activity => activity);
 
   next();
 };
 
-// Get all itineraries
-router.get("/", async (req, res) => {
-  try {
-    const itineraries = await Itinerary.find().sort({ createdAt: -1 });
-    res.json(itineraries);
-  } catch (error) {
-    console.error("GET error:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-// Get single itinerary by ID
-router.get("/:id", async (req, res) => {
-  try {
-    const itinerary = await Itinerary.findById(req.params.id);
-    if (!itinerary) {
-      return res.status(404).json({ error: "Itinerary not found" });
-    }
-    res.json(itinerary);
-  } catch (error) {
-    console.error("GET by ID error:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-// Create new itinerary
+// Create itinerary
 router.post("/", validateItinerary, async (req, res) => {
   try {
+    console.log("Creating itinerary:", req.body);
+    
     const newItinerary = new Itinerary({
-      ...req.body,
-      title: req.body.title.trim()
+      title: req.body.title,
+      description: req.body.description?.trim() || '',
+      activities: req.body.activities
     });
-    
-    await newItinerary.save();
-    res.status(201).json(newItinerary);
-  } catch (error) {
-    console.error("POST error:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
 
-// Update itinerary
-router.put("/:id", validateItinerary, async (req, res) => {
-  try {
-    const updatedItinerary = await Itinerary.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body, title: req.body.title.trim() },
-      { new: true, runValidators: true }
-    );
+    const savedItinerary = await newItinerary.save();
     
-    if (!updatedItinerary) {
-      return res.status(404).json({ error: "Itinerary not found" });
-    }
-    
-    res.json(updatedItinerary);
-  } catch (error) {
-    console.error("PUT error:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
+    res.status(201)
+      .header('Content-Type', 'application/json')
+      .json(savedItinerary);
 
-// Delete itinerary
-router.delete("/:id", async (req, res) => {
-  try {
-    const deletedItinerary = await Itinerary.findByIdAndDelete(req.params.id);
-    
-    if (!deletedItinerary) {
-      return res.status(404).json({ error: "Itinerary not found" });
-    }
-    
-    res.json({ 
-      message: "Itinerary deleted successfully",
-      deletedId: deletedItinerary._id 
+  } catch (error) {
+    console.error("Server error:", error);
+    res.status(500).json({ 
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
-  } catch (error) {
-    console.error("DELETE error:", error);
-    res.status(500).json({ error: "Server error" });
   }
 });
 
