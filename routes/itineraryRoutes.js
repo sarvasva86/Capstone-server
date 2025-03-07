@@ -54,6 +54,20 @@ router.post("/", validateItinerary, async (req, res) => {
       endDate
     });
 
+  // Authentication middleware
+  const authenticateUser = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: "Unauthorized" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: "Invalid token" });
+  }
+};
+
     const savedItinerary = await newItinerary.save();
     
     res.status(201).json({
@@ -72,7 +86,7 @@ router.post("/", validateItinerary, async (req, res) => {
 });
 
 // GET - All itineraries with error handling
-router.get("/", async (req, res) => {
+router.get("/", authenticateUser, async (req, res)=> {
   try {
     const itineraries = await Itinerary.find()
       .sort({ createdAt: -1 })
