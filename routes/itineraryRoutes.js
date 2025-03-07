@@ -1,12 +1,10 @@
+
 import express from "express";
 import Itinerary from "../models/Itinerary.js";
 
 const router = express.Router();
 
-// Middleware for JSON parsing error handling
-router.use(express.json());
-
-// Validation middleware
+// Enhanced validation middleware
 const validateItinerary = (req, res, next) => {
   if (!req.body) {
     return res.status(400).json({ error: "Request body is required" });
@@ -22,7 +20,7 @@ const validateItinerary = (req, res, next) => {
     return res.status(400).json({ error: "At least one valid activity is required" });
   }
 
-  // Clean data
+  // Clean and transform data
   req.body.title = title.trim();
   req.body.activities = activities
     .map(activity => activity?.trim())
@@ -31,41 +29,52 @@ const validateItinerary = (req, res, next) => {
   next();
 };
 
-// Create itinerary
+// POST - Create itinerary (with date handling)
 router.post("/", validateItinerary, async (req, res) => {
   try {
-    console.log("Creating itinerary:", req.body);
-    
     const newItinerary = new Itinerary({
       title: req.body.title,
       description: req.body.description?.trim() || '',
-      activities: req.body.activities
+      activities: req.body.activities,
+      startDate: req.body.startDate || Date.now(),
+      endDate: req.body.endDate || Date.now()
     });
 
     const savedItinerary = await newItinerary.save();
     
-    res.status(201)
-      .header('Content-Type', 'application/json')
-      .json(savedItinerary);
+    res.status(201).json({
+      ...savedItinerary.toObject(),
+      // Convert dates to ISO strings for frontend consistency
+      startDate: savedItinerary.startDate.toISOString(),
+      endDate: savedItinerary.endDate.toISOString()
+    });
 
   } catch (error) {
-    console.error("Server error:", error);
+    console.error("Save error:", error);
     res.status(500).json({ 
-      error: "Internal server error",
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: "Failed to save itinerary",
+      ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
     });
   }
 });
 
-
+// GET - All itineraries (with sorting)
 router.get("/", async (req, res) => {
   try {
-    const itineraries = await Itinerary.find();
-    res.json(itineraries);
+    const itineraries = await Itinerary.find()
+      .sort({ createdAt: -1 }) // Newest first
+      .lean(); // Return plain JS objects
+
+    // Convert dates to ISO format
+    const formattedItineraries = itineraries.map(it => ({
+      ...it,
+      startDate: it.startDate.toISOString(),
+      endDate: it.endDate.toISOString(),
+      createdAt: it.createdAt.toISOString()
+    }));
+
+    res.json(formattedItineraries);
+
   } catch (error) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-
-export default router;
+    console.error("Fetch error:", error);
+    res.status(500).json({ 
