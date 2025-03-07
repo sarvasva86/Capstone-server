@@ -1,23 +1,33 @@
-
 import express from "express";
 import Itinerary from "../models/Itinerary.js";
 
 const router = express.Router();
 
-// Enhanced validation middleware
+// Enhanced validation middleware with date checks
 const validateItinerary = (req, res, next) => {
   if (!req.body) {
     return res.status(400).json({ error: "Request body is required" });
   }
 
-  const { title, activities } = req.body;
+  const { title, activities, startDate, endDate } = req.body;
   
+  // Validate title
   if (!title?.trim()) {
     return res.status(400).json({ error: "Title is required" });
   }
   
+  // Validate activities
   if (!Array.isArray(activities) || activities.filter(a => a?.trim()).length === 0) {
     return res.status(400).json({ error: "At least one valid activity is required" });
+  }
+
+  // Validate dates
+  if (startDate && isNaN(new Date(startDate))) {
+    return res.status(400).json({ error: "Invalid start date format" });
+  }
+
+  if (endDate && isNaN(new Date(endDate))) {
+    return res.status(400).json({ error: "Invalid end date format" });
   }
 
   // Clean and transform data
@@ -29,22 +39,25 @@ const validateItinerary = (req, res, next) => {
   next();
 };
 
-// POST - Create itinerary (with date handling)
+// POST - Create itinerary with enhanced date handling
 router.post("/", validateItinerary, async (req, res) => {
   try {
+    // Parse dates or use current time
+    const startDate = req.body.startDate ? new Date(req.body.startDate) : new Date();
+    const endDate = req.body.endDate ? new Date(req.body.endDate) : new Date();
+
     const newItinerary = new Itinerary({
       title: req.body.title,
       description: req.body.description?.trim() || '',
       activities: req.body.activities,
-      startDate: req.body.startDate || Date.now(),
-      endDate: req.body.endDate || Date.now()
+      startDate,
+      endDate
     });
 
     const savedItinerary = await newItinerary.save();
     
     res.status(201).json({
-      ...savedItinerary.toObject(),
-      // Convert dates to ISO strings for frontend consistency
+      ...savedItinerary.toJSON(),
       startDate: savedItinerary.startDate.toISOString(),
       endDate: savedItinerary.endDate.toISOString()
     });
@@ -52,13 +65,13 @@ router.post("/", validateItinerary, async (req, res) => {
   } catch (error) {
     console.error("Save error:", error);
     res.status(500).json({ 
-      error: "Failed to save itinerary",
+      error: error.message || "Failed to save itinerary",
       ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
     });
   }
 });
 
-// GET - All itineraries (with sorting)
+// GET - All itineraries with error handling
 router.get("/", async (req, res) => {
   try {
     const itineraries = await Itinerary.find()
@@ -67,9 +80,9 @@ router.get("/", async (req, res) => {
 
     const formattedItineraries = itineraries.map(it => ({
       ...it,
-      startDate: it.startDate.toISOString(),
-      endDate: it.endDate.toISOString(),
-      createdAt: it.createdAt.toISOString()
+      startDate: new Date(it.startDate).toISOString(),
+      endDate: new Date(it.endDate).toISOString(),
+      createdAt: new Date(it.createdAt).toISOString()
     }));
 
     res.json(formattedItineraries);
@@ -77,10 +90,10 @@ router.get("/", async (req, res) => {
   } catch (error) {
     console.error("Fetch error:", error);
     res.status(500).json({ 
-      error: "Failed to fetch itineraries",
-      ...(process.env.NODE_ENV === 'development' && { details: error.message })
-    });  // Added closing curly brace and parenthesis
+      error: error.message || "Failed to fetch itineraries",
+      ...(process.env.NODE_ENV === 'development' && { details: error.toString() })
+    });
   }
-});  
+});
 
-export default router; 
+export default router;
