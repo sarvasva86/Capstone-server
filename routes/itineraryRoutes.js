@@ -62,10 +62,9 @@ router.post("/", validateItinerary, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const itineraries = await Itinerary.find()
-      .sort({ createdAt: -1 }) // Newest first
-      .lean(); // Return plain JS objects
+      .sort({ createdAt: -1 })
+      .lean();
 
-    // Convert dates to ISO format
     const formattedItineraries = itineraries.map(it => ({
       ...it,
       startDate: it.startDate.toISOString(),
@@ -78,3 +77,10 @@ router.get("/", async (req, res) => {
   } catch (error) {
     console.error("Fetch error:", error);
     res.status(500).json({ 
+      error: "Failed to fetch itineraries",
+      ...(process.env.NODE_ENV === 'development' && { details: error.message })
+    });  // Added closing curly brace and parenthesis
+  }
+});  
+
+export default router; 
