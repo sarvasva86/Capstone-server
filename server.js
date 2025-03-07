@@ -15,6 +15,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const corsOptions = {
+  origin: [
+    'https://capstone-frontend-0red.onrender.com',
+    'http://localhost:3000'
+  ],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204
+};
 
 // Middleware
 app.use(express.json());
@@ -25,6 +34,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
+app.use(cors(corsOptions));
 
 // Handle preflight requests
 app.options('*', cors());
@@ -38,9 +49,17 @@ mongoose.connect(process.env.MONGODB_URI)
 app.use("/api/auth", authRoutes);
 app.use("/api/itineraries", itineraryRoutes);
 
-// Simple health check endpoint
+// health check endpoint
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.status(200).json({ 
+    status: 'ok',
+    database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ message: "Backend is working!" });
 });
 
 // Client-side routing fallback
