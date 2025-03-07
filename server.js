@@ -56,4 +56,4 @@ app.listen(PORT, () => {
   console.log(`API Endpoints:`);
   console.log(`- GET /api/itineraries`);
   console.log(`- POST /api/itineraries`);
-}
+});
