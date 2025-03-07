@@ -19,9 +19,11 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: 'https://capstone-frontend-0red.onrender.com',
+  origin: ['https://capstone-frontend-0red.onrender.com', 
+  'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 // Handle preflight requests
@@ -41,5 +43,17 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// Client-side routing fallback
+app.get('*', (req, res) => {
+  res.status(404).json({ error: 'API endpoint not found' });
+});
+
+
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`));
+  console.log(`API Endpoints:`);
+  console.log(`- GET /api/itineraries`);
+  console.log(`- POST /api/itineraries`);
+}
