@@ -57,4 +57,15 @@ router.post("/", validateItinerary, async (req, res) => {
   }
 });
 
+
+router.get("/", async (req, res) => {
+  try {
+    const itineraries = await Itinerary.find();
+    res.json(itineraries);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 export default router;
