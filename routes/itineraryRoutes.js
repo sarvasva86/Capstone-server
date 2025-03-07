@@ -1,3 +1,5 @@
+
+import { authenticateUser } from "../middleware/auth.js";
 import express from "express";
 import Itinerary from "../models/Itinerary.js";
 
@@ -86,26 +88,25 @@ router.post("/", validateItinerary, async (req, res) => {
 });
 
 // GET - All itineraries with error handling
-router.get("/", authenticateUser, async (req, res)=> {
+router.get("/", authenticateUser, async (req, res) => {
   try {
-    const itineraries = await Itinerary.find()
+    const itineraries = await Itinerary.find({ user: req.user.id })
       .sort({ createdAt: -1 })
       .lean();
 
     const formattedItineraries = itineraries.map(it => ({
       ...it,
-      startDate: new Date(it.startDate).toISOString(),
-      endDate: new Date(it.endDate).toISOString(),
-      createdAt: new Date(it.createdAt).toISOString()
+      startDate: it.startDate.toISOString(),
+      endDate: it.endDate.toISOString(),
+      createdAt: it.createdAt.toISOString()
     }));
 
     res.json(formattedItineraries);
-
   } catch (error) {
     console.error("Fetch error:", error);
     res.status(500).json({ 
-      error: error.message || "Failed to fetch itineraries",
-      ...(process.env.NODE_ENV === 'development' && { details: error.toString() })
+      error: "Failed to fetch itineraries",
+      ...(process.env.NODE_ENV === 'development' && { details: error.message })
     });
   }
 });
