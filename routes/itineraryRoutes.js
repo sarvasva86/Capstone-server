@@ -94,11 +94,11 @@ router.get("/", authenticateUser, async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    const formattedItineraries = itineraries.map(it => ({
-      ...it,
-      startDate: it.startDate.toISOString(),
-      endDate: it.endDate.toISOString(),
-      createdAt: it.createdAt.toISOString()
+   const formattedItineraries = itineraries.map(it => ({
+  ...it,
+  startDate: it.startDate ? new Date(it.startDate).toISOString() : null,
+  endDate: it.endDate ? new Date(it.endDate).toISOString() : null,
+  createdAt: it.createdAt ? new Date(it.createdAt).toISOString() : null
     }));
 
     res.json(formattedItineraries);
