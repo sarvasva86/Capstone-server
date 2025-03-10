@@ -6,6 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import itineraryRoutes from "./routes/itineraryRoutes.js";
+import recommendationRoutes from "./routes/recommendationRoutes.js";
 
 // Configure environment
 dotenv.config();
@@ -67,6 +68,7 @@ app.get('*', (req, res) => {
   res.status(404).json({ error: 'API endpoint not found' });
 });
 
+app.use("/api/recommendations", recommendationRoutes);
 
 
 const PORT = process.env.PORT || 5000;
