@@ -11,7 +11,7 @@ const validateItinerary = (req, res, next) => {
   }
 
   const { title, activities, startDate, endDate } = req.body;
-  
+
   if (!title?.trim()) {
     return res.status(400).json({ error: "Title is required" });
   }
@@ -39,9 +39,12 @@ router.post("/", authenticateUser, validateItinerary, async (req, res) => {
   try {
     const { title, description, startDate, endDate, activities } = req.body;
 
-    // Ensure `userId` is included
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+    }
+
     const newItinerary = new Itinerary({
-      userId: req.user.id, // ✅ Added `userId`
+      userId: req.user.id, // ✅ Ensured `userId` is included
       title,
       description: description?.trim() || "",
       activities,
@@ -61,9 +64,11 @@ router.post("/", authenticateUser, validateItinerary, async (req, res) => {
 // ✅ FIXED: `GET` Route - Fetch All User Itineraries
 router.get("/", authenticateUser, async (req, res) => {
   try {
-    const itineraries = await Itinerary.find({ userId: req.user.id }) // ✅ FIXED: `userId` instead of `user`
-      .sort({ createdAt: -1 })
-      .lean();
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+    }
+
+    const itineraries = await Itinerary.find({ userId: req.user.id }).sort({ createdAt: -1 }).lean();
 
     res.json(itineraries.map(it => ({
       ...it,
