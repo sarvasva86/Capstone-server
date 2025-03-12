@@ -111,4 +111,30 @@ router.get("/", authenticateUser, async (req, res) => {
   }
 });
 
+router.post("/", authenticateUser, async (req, res) => {
+  try {
+    const { title, description, startDate, endDate, activities } = req.body;
+
+    if (!title || !startDate || !endDate) {
+      return res.status(400).json({ error: "Title, start date, and end date are required" });
+    }
+
+    const newItinerary = new Itinerary({
+      userId: req.user.id, // Ensure user is authenticated
+      title,
+      description: description || "",
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      activities: activities || [],
+    });
+
+    const savedItinerary = await newItinerary.save();
+    res.status(201).json(savedItinerary);
+  } catch (error) {
+    console.error("Error saving itinerary:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 export default router;
