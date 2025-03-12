@@ -4,81 +4,79 @@ import Itinerary from "../models/Itinerary.js";
 
 const router = express.Router();
 
-// ✅ Middleware to Validate Itinerary Data
+// Validation Middleware
 const validateItinerary = (req, res, next) => {
-  if (!req.body) {
-    return res.status(400).json({ error: "Request body is required" });
-  }
-
-  const { title, activities, startDate, endDate } = req.body;
-
-  if (!title?.trim()) {
-    return res.status(400).json({ error: "Title is required" });
-  }
-
+  const { title, activities } = req.body;
+  
+  if (!title?.trim()) return res.status(400).json({ error: "Title is required" });
   if (!Array.isArray(activities) || activities.filter(a => a?.trim()).length === 0) {
-    return res.status(400).json({ error: "At least one valid activity is required" });
-  }
-
-  if (startDate && isNaN(new Date(startDate))) {
-    return res.status(400).json({ error: "Invalid start date format" });
-  }
-
-  if (endDate && isNaN(new Date(endDate))) {
-    return res.status(400).json({ error: "Invalid end date format" });
+    return res.status(400).json({ error: "At least one valid activity required" });
   }
 
   req.body.title = title.trim();
-  req.body.activities = activities.map(activity => activity?.trim()).filter(activity => activity);
+  req.body.activities = activities
+    .map(a => a?.trim())
+    .filter(a => a);
 
   next();
 };
 
-// ✅ FIXED: Merged `POST` Route (With Authentication & Validation)
+// POST Route
 router.post("/", authenticateUser, validateItinerary, async (req, res) => {
   try {
-    const { title, description, startDate, endDate, activities } = req.body;
-
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
-    }
+    const { title, activities, startDate, endDate } = req.body;
 
     const newItinerary = new Itinerary({
-      userId: req.user.id, // ✅ Ensured `userId` is included
+      userId: req.user.id,
       title,
-      description: description?.trim() || "",
       activities,
-      startDate: new Date(startDate) || new Date(),
-      endDate: new Date(endDate) || new Date(),
+      startDate: new Date(startDate),
+      endDate: new Date(endDate)
     });
 
     const savedItinerary = await newItinerary.save();
 
-    res.status(201).json(savedItinerary);
+    // Explicit response format
+    res.status(201).json({
+      _id: savedItinerary._id,
+      title: savedItinerary.title,
+      activities: savedItinerary.activities,
+      startDate: savedItinerary.startDate.toISOString(),
+      endDate: savedItinerary.endDate.toISOString(),
+      createdAt: savedItinerary.createdAt.toISOString()
+    });
+
   } catch (error) {
     console.error("Save error:", error);
-    res.status(500).json({ error: "Failed to save itinerary" });
+    res.status(500).json({ 
+      error: "Failed to save itinerary",
+      ...(process.env.NODE_ENV === 'development' && { details: error.message })
+    });
   }
 });
 
-// ✅ FIXED: `GET` Route - Fetch All User Itineraries
+// GET Route
 router.get("/", authenticateUser, async (req, res) => {
   try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
-    }
-
-    const itineraries = await Itinerary.find({ userId: req.user.id }).sort({ createdAt: -1 }).lean();
+    const itineraries = await Itinerary.find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .lean();
 
     res.json(itineraries.map(it => ({
-      ...it,
-      startDate: it.startDate ? new Date(it.startDate).toISOString() : null,
-      endDate: it.endDate ? new Date(it.endDate).toISOString() : null,
-      createdAt: it.createdAt ? new Date(it.createdAt).toISOString() : null
+      _id: it._id,
+      title: it.title,
+      activities: it.activities,
+      startDate: it.startDate.toISOString(),
+      endDate: it.endDate.toISOString(),
+      createdAt: it.createdAt.toISOString()
     })));
+
   } catch (error) {
     console.error("Fetch error:", error);
-    res.status(500).json({ error: "Failed to fetch itineraries" });
+    res.status(500).json({ 
+      error: "Failed to fetch itineraries",
+      ...(process.env.NODE_ENV === 'development' && { details: error.message })
+    });
   }
 });
 
