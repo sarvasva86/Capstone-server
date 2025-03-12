@@ -33,7 +33,7 @@ app.use(cors({
   'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
-  exposedHeaders: ['X-Request-ID'],],
+  exposedHeaders: ['X-Request-ID'],
   credentials: true
 }));
 
