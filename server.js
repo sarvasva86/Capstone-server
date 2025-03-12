@@ -32,7 +32,8 @@ app.use(cors({
   origin: ['https://capstone-frontend-0red.onrender.com', 
   'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-ID'],
+  exposedHeaders: ['X-Request-ID'],],
   credentials: true
 }));
 
