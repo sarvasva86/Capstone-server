@@ -31,7 +31,7 @@ const validateItinerary = (req, res, next) => {
 };
 
 // ✅ POST Route: Create Itinerary
-router.post("/", authenticateUser, validateItinerary, async (req, res) => {
+router.post("/", authenticateUser, async (req, res) => {
   try {
     const { title, activities, description, startDate, endDate } = req.body;
 
@@ -40,34 +40,22 @@ router.post("/", authenticateUser, validateItinerary, async (req, res) => {
     }
 
     const newItinerary = new Itinerary({
-      userId: req.user.id, // ✅ Ensure `userId` is set
+      userId: req.user.id, // ✅ Ensure correct user ID is used
       title,
       activities: activities || [],
       description: description?.trim() || "",
-      startDate: startDate ? new Date(startDate) : new Date(), // ✅ Prevent null value
-      endDate: endDate ? new Date(endDate) : new Date() // ✅ Prevent null value
+      startDate: startDate ? new Date(startDate) : new Date(),
+      endDate: endDate ? new Date(endDate) : new Date(),
     });
 
     const savedItinerary = await newItinerary.save();
-
-    res.status(201).json({
-      _id: savedItinerary._id,
-      title: savedItinerary.title,
-      activities: savedItinerary.activities,
-      description: savedItinerary.description,
-      startDate: savedItinerary.startDate.toISOString(),
-      endDate: savedItinerary.endDate.toISOString(),
-      createdAt: savedItinerary.createdAt.toISOString()
-    });
-
+    res.status(201).json(savedItinerary);
   } catch (error) {
     console.error("Save error:", error);
-    res.status(500).json({ 
-      error: "Failed to save itinerary",
-      ...(process.env.NODE_ENV === 'development' && { details: error.message })
-    });
+    res.status(500).json({ error: "Failed to save itinerary" });
   }
 });
+
 
 // ✅ GET Route: Fetch User Itineraries
 router.get("/", authenticateUser, async (req, res) => {
