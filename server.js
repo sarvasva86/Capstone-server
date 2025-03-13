@@ -19,6 +19,22 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Mock AI Travel Suggestion API
+app.get("/api/suggestions", (req, res) => {
+  const destination = req.query.destination;
+
+  // Simulate an AI-powered suggestion (You can integrate with an AI API or custom logic here)
+  const suggestions = [
+    `${destination} Beach Adventure`,
+    `${destination} Mountain Hike`,
+    `${destination} City Tour`,
+    `${destination} Local Culture Exploration`,
+  ];
+
+  res.json({ suggestions });
+});
+
+
 // ✅ Correct CORS Configuration
 const corsOptions = {
   origin: ["https://capstone-frontend-0red.onrender.com", "http://localhost:3000"], // ✅ Allow frontend
