@@ -29,7 +29,8 @@ router.post("/", authenticateUser, validateItinerary, async (req, res) => {
     const newItinerary = new Itinerary({
       userId: req.user.id,
       title,
-      activities,
+      activities: activities || [],
+      description: description || "",
       startDate: new Date(startDate),
       endDate: new Date(endDate)
     });
