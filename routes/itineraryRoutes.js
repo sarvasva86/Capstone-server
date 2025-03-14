@@ -13,7 +13,7 @@ const validateItinerary = (req, res, next) => {
   }
 
   req.body.title = title.trim();
-  req.body.description = description?.trim() || "";
+  req.body.description = description?.trim() || "No description available.";
   req.body.activities = Array.isArray(activities) ? activities.filter(a => a?.trim()) : [];
 
   next();
@@ -53,29 +53,3 @@ router.post("/", authenticateUser, validateItinerary, async (req, res) => {
     res.status(500).json({ error: "Failed to save itinerary" });
   }
 });
-
-// ✅ GET Route: Fetch Itineraries
-router.get("/", authenticateUser, async (req, res) => {
-  try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
-    }
-
-    const itineraries = await Itinerary.find({ userId: req.user.id }).sort({ createdAt: -1 }).lean();
-
-    res.json(itineraries.map(it => ({
-      _id: it._id,
-      title: it.title || "Untitled Itinerary",
-      description: it.description || "No description available.",
-      activities: it.activities || [],
-      startDate: it.startDate ? new Date(it.startDate).toISOString() : null,
-      endDate: it.endDate ? new Date(it.endDate).toISOString() : null,
-    })));
-
-  } catch (error) {
-    console.error("Fetch error:", error);
-    res.status(500).json({ error: "Failed to fetch itineraries" });
-  }
-});
-
-export default router;
