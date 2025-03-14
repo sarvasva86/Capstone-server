@@ -28,3 +28,8 @@ export const authenticateUser = (req, res, next) => {
     return res.status(401).json({ error: "Unauthorized: Invalid token" });
   }
 };
+
+// ✅ Generate a new token with longer expiration
+export const generateToken = (userId) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" }); // Extends token validity to 7 days
+};
