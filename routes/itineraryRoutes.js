@@ -19,6 +19,18 @@ const validateItinerary = (req, res, next) => {
   next();
 };
 
+// ✅ Fetch User Itineraries (GET /api/itineraries)
+router.get("/", authenticateUser, async (req, res) => {
+  try {
+    const itineraries = await Itinerary.find({ userId: req.user.id }).lean();
+    res.json(itineraries);
+  } catch (error) {
+    console.error("Fetch error:", error);
+    res.status(500).json({ error: "Failed to fetch itineraries" });
+  }
+});
+
+
 // ✅ POST Route: Create Itinerary
 router.post("/", authenticateUser, validateItinerary, async (req, res) => {
   try {
