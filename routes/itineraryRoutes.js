@@ -53,3 +53,5 @@ router.post("/", authenticateUser, validateItinerary, async (req, res) => {
     res.status(500).json({ error: "Failed to save itinerary" });
   }
 });
+
+export default router; 
