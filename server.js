@@ -43,6 +43,22 @@ const corsOptions = {
   credentials: true,
 };
 
+// ✅ AI Travel Suggestions Endpoint (Fix CORS)
+app.get("/api/suggestions", (req, res) => {
+  const destination = req.query.destination || "Travel";
+  
+  // Simulated AI-powered travel suggestions
+  const suggestions = [
+    `${destination} Beach Adventure`,
+    `${destination} City Sightseeing`,
+    `${destination} Local Food Tour`,
+    `${destination} Museum Exploration`,
+    `${destination} Nature Hiking`,
+  ];
+
+  res.json({ suggestions });
+});
+
 // ✅ Use CORS Middleware Once
 app.use(cors(corsOptions));
 
