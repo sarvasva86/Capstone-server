@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-const itinerarySchema = new mongoose.Schema({
-  userId: String,
-  destinations: [String],
-  activities: [String],    // User-defined activities
-  startDate: Date,
-  endDate: Date,
-  savedActivities: [{ type: String }] // Tracks user preferences
+const ItinerarySchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  title: { type: String, required: true, trim: true },
+  description: { type: String, default: "No description available.", trim: true },
+  activities: [{ type: String, trim: true }],
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
 });
 
-export default mongoose.model("Itinerary", itinerarySchema);
+export default mongoose.model("Itinerary", ItinerarySchema);
