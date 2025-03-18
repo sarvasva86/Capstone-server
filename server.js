@@ -46,13 +46,14 @@ app.use("/api/recommendations", recommendationRoutes);
 app.get("/api/suggestions", (req, res) => {
   const destination = req.query.destination || "Travel";
 
-  const suggestions = [
+  /*const suggestions = [
     `${destination} Beach Adventure`,
     `${destination} City Sightseeing`,
     `${destination} Local Food Tour`,
     `${destination} Museum Exploration`,
     `${destination} Nature Hiking`,
-  ];
+  ];*/
+
 const travelIdeas = [
   "Beach Adventure",
   "City Sightseeing",
