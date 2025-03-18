@@ -1,5 +1,3 @@
-
-
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -19,51 +17,16 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Mock AI Travel Suggestion API
-app.get("/api/suggestions", (req, res) => {
-  const destination = req.query.destination;
-
-  // Simulate an AI-powered suggestion (You can integrate with an AI API or custom logic here)
-  const suggestions = [
-    `${destination} Beach Adventure`,
-    `${destination} Mountain Hike`,
-    `${destination} City Tour`,
-    `${destination} Local Culture Exploration`,
-  ];
-
-  res.json({ suggestions });
-});
-
-
-// ✅ Correct CORS Configuration
+// ✅ Apply CORS Middleware Before Routes
 const corsOptions = {
-  origin: ["https://capstone-frontend-0red.onrender.com", "http://localhost:3000"], // ✅ Allow frontend
+  origin: ["https://capstone-frontend-0red.onrender.com", "http://localhost:3000"],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
 
-// ✅ AI Travel Suggestions Endpoint (Fix CORS)
-app.get("/api/suggestions", (req, res) => {
-  const destination = req.query.destination || "Travel";
-  
-  // Simulated AI-powered travel suggestions
-  const suggestions = [
-    `${destination} Beach Adventure`,
-    `${destination} City Sightseeing`,
-    `${destination} Local Food Tour`,
-    `${destination} Museum Exploration`,
-    `${destination} Nature Hiking`,
-  ];
-
-  res.json({ suggestions });
-});
-
-// ✅ Use CORS Middleware Once
 app.use(cors(corsOptions));
-
-// ✅ Handle preflight requests properly
-app.options("*", cors(corsOptions));
+app.options("*", cors(corsOptions)); // Handle preflight requests
 
 // Middleware
 app.use(express.json());
@@ -78,6 +41,21 @@ mongoose
 app.use("/api/auth", authRoutes);
 app.use("/api/itineraries", itineraryRoutes);
 app.use("/api/recommendations", recommendationRoutes);
+
+// ✅ AI Travel Suggestions Endpoint (with CORS applied)
+app.get("/api/suggestions", (req, res) => {
+  const destination = req.query.destination || "Travel";
+
+  const suggestions = [
+    `${destination} Beach Adventure`,
+    `${destination} City Sightseeing`,
+    `${destination} Local Food Tour`,
+    `${destination} Museum Exploration`,
+    `${destination} Nature Hiking`,
+  ];
+
+  res.json({ suggestions });
+});
 
 // ✅ Health check endpoint
 app.get("/health", (req, res) => {
@@ -105,3 +83,4 @@ app.listen(PORT, () => {
   console.log(`- GET /api/itineraries`);
   console.log(`- POST /api/itineraries`);
 });
+
