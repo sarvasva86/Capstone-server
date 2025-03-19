@@ -1,3 +1,5 @@
+const timeWindows = ["Morning", "Afternoon", "Evening"];
+
 export const getTravelSuggestions = (req, res) => {
   const destination = req.query.destination || "Travel";
 
@@ -14,9 +16,11 @@ export const getTravelSuggestions = (req, res) => {
     "Shopping & Markets",
   ];
 
-  // Shuffle and pick 5 random suggestions
   const shuffled = travelIdeas.sort(() => 0.5 - Math.random());
-  const suggestions = shuffled.slice(0, 5).map((idea) => `${destination} ${idea}`);
+  const suggestions = shuffled.slice(0, 5).map((idea) => {
+    const time = timeWindows[Math.floor(Math.random() * timeWindows.length)];
+    return `${destination} ${idea} - ${time}`;
+  });
 
   res.json({ suggestions });
 };
