@@ -1,4 +1,4 @@
-const Itinerary = require("../models/Itinerary");
+const itineraryService = require("../services/itineraryService");
 
 // ✅ Create Itinerary
 exports.createItinerary = async (req, res) => {
@@ -8,7 +8,7 @@ exports.createItinerary = async (req, res) => {
       return res.status(400).json({ error: "Title and description are required" });
     }
 
-    const newItinerary = new Itinerary({
+    const itinerary = await itineraryService.createItinerary({
       title,
       description,
       startDate,
@@ -16,8 +16,7 @@ exports.createItinerary = async (req, res) => {
       userId: req.userId, // Assuming authentication middleware exists
     });
 
-    await newItinerary.save();
-    res.status(201).json(newItinerary);
+    res.status(201).json(itinerary);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -26,8 +25,47 @@ exports.createItinerary = async (req, res) => {
 // ✅ Get All Itineraries
 exports.getItineraries = async (req, res) => {
   try {
-    const itineraries = await Itinerary.find({ userId: req.userId }); // Fetch only user's itineraries
+    const itineraries = await itineraryService.getUserItineraries(req.userId);
     res.json(itineraries);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// ✅ Get Single Itinerary by ID
+exports.getItineraryById = async (req, res) => {
+  try {
+    const itinerary = await itineraryService.getItineraryById(req.params.id, req.userId);
+    if (!itinerary) {
+      return res.status(404).json({ error: "Itinerary not found" });
+    }
+    res.json(itinerary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// ✅ Update Itinerary
+exports.updateItinerary = async (req, res) => {
+  try {
+    const updatedItinerary = await itineraryService.updateItinerary(req.params.id, req.body, req.userId);
+    if (!updatedItinerary) {
+      return res.status(404).json({ error: "Itinerary not found or unauthorized" });
+    }
+    res.json(updatedItinerary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// ✅ Delete Itinerary
+exports.deleteItinerary = async (req, res) => {
+  try {
+    const deleted = await itineraryService.deleteItinerary(req.params.id, req.userId);
+    if (!deleted) {
+      return res.status(404).json({ error: "Itinerary not found or unauthorized" });
+    }
+    res.json({ message: "Itinerary deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
