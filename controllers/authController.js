@@ -13,6 +13,22 @@ exports.register = async (req, res) => {
       return res.status(400).json({ error: "User already exists" });
     }
 
+    const isValidPassword = (password) => {
+  return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(password);
+};
+
+exports.signup = async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!isValidPassword(password)) {
+    return res.status(400).json({ error: "Password must be at least 8 characters long and include a number and a special character." });
+  }
+};
+
+
+
+    
+
     // Hash the password before saving
     const hashedPassword = await bcrypt.hash(password, 10);
 
