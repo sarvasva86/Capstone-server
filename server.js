@@ -7,6 +7,7 @@ import { fileURLToPath } from "url";
 import authRoutes from "./routes/authRoutes.js";
 import itineraryRoutes from "./routes/itineraryRoutes.js";
 import recommendationRoutes from "./routes/recommendationRoutes.js";
+import { getTravelSuggestions } from "./controllers/suggestionController.js"; // ✅ New controller for suggestions
 
 // Configure environment
 dotenv.config();
@@ -22,7 +23,7 @@ const corsOptions = {
   origin: ["https://capstone-frontend-0red.onrender.com", "http://localhost:3000"],
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  credentials: true, // ✅ Ensures proper CORS handling for cookies/auth
 };
 
 app.use(cors(corsOptions));
@@ -31,48 +32,20 @@ app.options("*", cors(corsOptions)); // Handle preflight requests
 // Middleware
 app.use(express.json());
 
-// Database connection
+// ✅ Database Connection
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("✅ MongoDB Connected"))
-  .catch((err) => console.error("❌ MongoDB Connection Error:", err));
+  .catch((err) => {
+    console.error("❌ MongoDB Connection Error:", err);
+    process.exit(1); // Exit if database fails to connect
+  });
 
-// API Routes
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/itineraries", itineraryRoutes);
 app.use("/api/recommendations", recommendationRoutes);
-
-// ✅ AI Travel Suggestions Endpoint (with CORS applied)
-app.get("/api/suggestions", (req, res) => {
-  const destination = req.query.destination || "Travel";
-
-  /*const suggestions = [
-    `${destination} Beach Adventure`,
-    `${destination} City Sightseeing`,
-    `${destination} Local Food Tour`,
-    `${destination} Museum Exploration`,
-    `${destination} Nature Hiking`,
-  ];*/
-
-const travelIdeas = [
-  "Beach Adventure",
-  "City Sightseeing",
-  "Local Food Tour",
-  "Museum Exploration",
-  "Nature Hiking",
-  "River Cruise",
-  "Historic Monuments Tour",
-  "Nightlife & Bars",
-  "Adventure Sports",
-  "Shopping & Markets",
-];
-  
-   // Shuffle and pick 5 random suggestions
-  const shuffled = travelIdeas.sort(() => 0.5 - Math.random());
-  const suggestions = shuffled.slice(0, 5).map((idea) => `${destination} ${idea}`);
-
-  res.json({ suggestions });
-});
+app.get("/api/suggestions", getTravelSuggestions); // ✅ Use the new AI suggestions controller
 
 // ✅ Health check endpoint
 app.get("/health", (req, res) => {
@@ -100,4 +73,3 @@ app.listen(PORT, () => {
   console.log(`- GET /api/itineraries`);
   console.log(`- POST /api/itineraries`);
 });
-
